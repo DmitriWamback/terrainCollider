@@ -110,7 +110,7 @@ public:
         float terrainX = wx;
         float terrainZ = wz;
         
-        float gridSquare = 1;
+        float gridSquare = 1; // distance between vertices (on the x and z axis)
         int gridX = (int)floor(terrainX / gridSquare);
         int gridZ = (int)floor(terrainZ / gridSquare);
         
