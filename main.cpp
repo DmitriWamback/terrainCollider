@@ -27,14 +27,14 @@ GLenum RenderingType = GL_LINES;
 bool DebugMode = false;
 
 #include "noise.h"
-
 #include "shader.h"
+#include "cube.h"
 #include "terrain.h"
 
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 800
 
-#define CAMERA_SPEED 2
+#define CAMERA_SPEED .1
 
 int windowWidth = SCREEN_WIDTH, windowHeight = SCREEN_HEIGHT;
 float xrot = 0, yrot = 0;
@@ -50,7 +50,7 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 void scroll(GLFWwindow* window,double x,double y) {
-    zoom += y;
+    zoom -= y;
     cout << x << endl;
 }
 
@@ -111,6 +111,7 @@ int main(int argc, const char * argv[]) {
     Shader shader = Shader("vertexShader.glsl", "fragmentShader.glsl");
     
     glEnable(GL_DEPTH_TEST);
+    initializeCube();
     Terrain terrain = Terrain();
     
     while (!glfwWindowShouldClose(window)) {
@@ -125,8 +126,7 @@ int main(int argc, const char * argv[]) {
         if (yrot > 1.93f) yrot = 1.93f;
         if (yrot < -1.93f) yrot = -1.93f;
         
-        if (zoom < 10) zoom = 10;
-        
+        if (zoom < 2) zoom = 2;
         direction = normalize(vec3(sin(xrot) * zoom, 0, cos(xrot) * zoom));
         
         mat4 model = mat4(1.0);
@@ -152,7 +152,10 @@ int main(int argc, const char * argv[]) {
         shader.set_mat4(glGetUniformLocation(shader.program, "view"), view);
         shader.set_mat4(glGetUniformLocation(shader.program, "model"), model);
         
+        vec3 color = vec3(1.0, 0.0, 0.0);
+        shader.set_vec3(glGetUniformLocation(shader.program, "color"), color);
         terrain.render_terrain(shader);
+        renderCube(shader, position);
         
         glfwPollEvents();
         glfwSwapBuffers(window);

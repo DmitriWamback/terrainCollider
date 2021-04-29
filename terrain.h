@@ -11,6 +11,8 @@
 int resolution = 100;
 perlin_noise noise;
 
+#define TERRAIN_SIZE 2
+
 float noiseLayer(float x, float y, float lacunarity, float persistance, int octaves) {
     
     float freq = .5,
@@ -50,12 +52,12 @@ public:
                 cout << index << endl;
                 
                 float h = 0;
-                h = noiseLayer((float)x/resolution, (float)y/resolution, 2, .5, 16);
+                h = noiseLayer((float)x/resolution, (float)y/resolution, 2, .5, 16)*1.5;
                 
                 //MARK: might be [y][x]
                 heights[x][y] = h;
                 
-                vec3 coord = vec3((x), h, (y));
+                vec3 coord = vec3((x*TERRAIN_SIZE), h, (y*TERRAIN_SIZE));
                 vec3 normal = vec3(0, 1, 0);
                 
                 terrain_vertices[index*6  ] = coord.x;
@@ -94,6 +96,7 @@ public:
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), NULL);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+        glBindVertexArray(0);
     }
     
     float baryCentric(vec3 p1, vec3 p2, vec3 p3, vec2 pos) {
@@ -110,7 +113,7 @@ public:
         float terrainX = wx;
         float terrainZ = wz;
         
-        float gridSquare = 1; // distance between vertices (on the x and z axis)
+        float gridSquare = TERRAIN_SIZE;
         int gridX = (int)floor(terrainX / gridSquare);
         int gridZ = (int)floor(terrainZ / gridSquare);
         
@@ -130,7 +133,7 @@ public:
                                  vec3(0, heights[gridX  ][gridZ+1], 1),
                                  vec2(xCoord, zCoord));
         }
-        return result;
+        return result+1;
     }
 
     void render_terrain(Shader &shader) {
