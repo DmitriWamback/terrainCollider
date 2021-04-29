@@ -34,7 +34,7 @@ bool DebugMode = false;
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 800
 
-#define CAMERA_SPEED .1
+#define CAMERA_SPEED 0.5
 
 int windowWidth = SCREEN_WIDTH, windowHeight = SCREEN_HEIGHT;
 float xrot = 0, yrot = 0;
@@ -111,6 +111,7 @@ int main(int argc, const char * argv[]) {
     Shader shader = Shader("vertexShader.glsl", "fragmentShader.glsl");
     
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_PROGRAM_POINT_SIZE);
     initializeCube();
     Terrain terrain = Terrain();
     
@@ -123,14 +124,16 @@ int main(int argc, const char * argv[]) {
         float height = terrain.getHeights(position.x, position.z);
         position = vec3(position.x, height, position.z);
         
-        if (yrot > 1.93f) yrot = 1.93f;
-        if (yrot < -1.93f) yrot = -1.93f;
+        cout << yrot << endl;
+        
+        if (yrot > 1.54362f) yrot = 1.54362f;
+        if (yrot < -1.54362f) yrot = -1.54362f;
         
         if (zoom < 2) zoom = 2;
         direction = normalize(vec3(sin(xrot) * zoom, 0, cos(xrot) * zoom));
         
         mat4 model = mat4(1.0);
-        mat4 view = lookAt(vec3(sin(xrot) * zoom, sin(yrot) * zoom, cos(xrot) * zoom)+position, position, vec3(0,1,0));
+        mat4 view = lookAt(vec3(sin(xrot) * cos(yrot) * zoom, sin(yrot) * zoom, cos(xrot) * cos(yrot) * zoom)+position, position, vec3(0,1,0));
         mat4 projection = perspective(90.f, 1.0f, .1f, 2000.f);
         
 #ifdef __APPLE__
@@ -154,7 +157,8 @@ int main(int argc, const char * argv[]) {
         
         vec3 color = vec3(1.0, 0.0, 0.0);
         shader.set_vec3(glGetUniformLocation(shader.program, "color"), color);
-        terrain.render_terrain(shader);
+        terrain.render_terrain(shader, GL_LINES);
+        terrain.render_terrain(shader, GL_POINTS);
         renderCube(shader, position);
         
         glfwPollEvents();
